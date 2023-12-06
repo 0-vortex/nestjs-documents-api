@@ -13,6 +13,18 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## Local development
+
+```shell
+# start the database containers
+docker compose up --remove-orphans -d
+```
+
+Navigate to 
+- [localhost:3001/swagger](http://localhost:3001/swagger) for API docs
+- [localhost:8888](http://localhost:8888) for pgAdmin
+- [localhost:8889](http://localhost:8889) for pev2
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository with strategies:
