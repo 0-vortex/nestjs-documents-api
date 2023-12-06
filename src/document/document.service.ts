@@ -60,4 +60,34 @@ export class DocumentService {
 
     return item;
   }
+
+  async findOneByIdAndDraftId(id: string, draftId: string) {
+    const queryBuilder = this.baseQueryBuilder()
+      .loadRelationCountAndMap('document.versionsCount', 'document.documentVersions')
+      .leftJoinAndMapOne(
+        'document.lastVersion',
+        'document.documentVersions',
+        'document_version',
+        'document_version.document_id = document.document_id',
+      )
+      .leftJoinAndMapOne(
+        'document.draft',
+        'document.documentDrafts',
+        'document_draft',
+        'document_draft.document_id = document.document_id and document_draft.document_version_id = document_version.document_version_id',
+      );
+
+    queryBuilder.where('document.document_id = :id and document_draft.document_draft_id = :draftId', {
+      id,
+      draftId,
+    });
+
+    const item = await queryBuilder.getOne();
+
+    if (!item) {
+      throw new NotFoundException();
+    }
+
+    return item;
+  }
 }

@@ -1,6 +1,7 @@
 import { Entity, Column, BaseEntity, PrimaryColumn, CreateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DbDocumentVersion } from './document_version.entity';
+import { DbDocumentDraft } from './document_draft.entity';
 
 @Entity({ name: 'documents' })
 export class DbDocument extends BaseEntity {
@@ -51,6 +52,10 @@ export class DbDocument extends BaseEntity {
   @ApiHideProperty()
   @OneToMany(() => DbDocumentVersion, (documentVersion) => documentVersion.document)
   public documentVersions: DbDocumentVersion[];
+
+  @ApiHideProperty()
+  @OneToMany(() => DbDocumentDraft, (documentDraft) => documentDraft.document)
+  public documentDrafts: DbDocumentDraft[];
 
   @ApiProperty({
     description: 'Document version data',

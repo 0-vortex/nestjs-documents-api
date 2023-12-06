@@ -3,6 +3,7 @@ import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nest
 import { DocumentService } from './document.service';
 import { DbDocument } from './entities/document.entity';
 import { DbDocumentVersion } from './entities/document_version.entity';
+import { DbDocumentDraft } from './entities/document_draft.entity';
 
 @Controller('documents')
 @ApiTags('Document service')
@@ -29,5 +30,16 @@ export class DocumentController {
   @ApiNotFoundResponse({ description: 'Document version not found' })
   async findOneByIdAndVersionId(@Param('id') id: string, @Param('versionId') versionId: string): Promise<DbDocument> {
     return this.documentService.findOneByIdAndVersionId(id, versionId);
+  }
+
+  @Get('/:id/draft/:draftId')
+  @ApiOperation({
+    operationId: 'findOneByIdAndDraftId',
+    summary: 'Finds a document draft by :id and :draftId',
+  })
+  @ApiOkResponse({ type: DbDocumentDraft })
+  @ApiNotFoundResponse({ description: 'Document draft not found' })
+  async findOneByIdAndDraftId(@Param('id') id: string, @Param('draftId') draftId: string): Promise<DbDocument> {
+    return this.documentService.findOneByIdAndDraftId(id, draftId);
   }
 }
