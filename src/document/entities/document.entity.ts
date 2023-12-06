@@ -27,9 +27,8 @@ export class DbDocument extends BaseEntity {
   })
   @Column({
     type: 'integer',
-    select: false,
   })
-  public user_id!: number;
+  public user_id: number;
 
   @ApiPropertyOptional({
     description: 'Timestamp representing user creation',
