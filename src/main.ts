@@ -68,8 +68,7 @@ code | condition
     .setDescription(markdownDescription)
     .setVersion(`1`)
     .setTermsOfService('https://github.com/open-sauced/code-of-conduct')
-    .setLicense(`The MIT License`, `https://opensource.org/licenses/mit`)
-    .addBearerAuth();
+    .setLicense(`The MIT License`, `https://opensource.org/licenses/mit`);
 
   const document = SwaggerModule.createDocument(app, options.build(), {
     operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
