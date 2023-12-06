@@ -11,7 +11,6 @@ import { clc } from '@nestjs/common/utils/cli-colors.util';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthModule } from './health/health.module';
 import { HttpModule } from '@nestjs/axios';
-import { HelloModule } from './hello/hello.module';
 import { DbDocument } from './document/entities/document.entity';
 import { DbDocumentVersion } from './document/entities/document_version.entity';
 import { DbDocumentDraft } from './document/entities/document_draft.entity';
@@ -25,7 +24,6 @@ import { DocumentModule } from './document/document.module';
     }),
     DocumentModule,
     HealthModule,
-    HelloModule,
     HttpModule,
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
