@@ -17,7 +17,14 @@ export class DocumentService {
   }
 
   async findOneById(id: string) {
-    const queryBuilder = this.baseQueryBuilder();
+    const queryBuilder = this.baseQueryBuilder()
+      .loadRelationCountAndMap('document.versionsCount', 'document.documentVersions')
+      .leftJoinAndMapOne(
+        'document.lastVersion',
+        'document.documentVersions',
+        'document_version',
+        'document_version.version_number = document.version_number',
+      );
 
     queryBuilder.where('document.document_id = :id', { id });
 

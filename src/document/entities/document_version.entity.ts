@@ -1,5 +1,7 @@
-import { Entity, Column, BaseEntity, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Entity, Column, BaseEntity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne } from 'typeorm';
+import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { DbDocument } from './document.entity';
+import { JoinColumn } from 'typeorm';
 
 @Entity({ name: 'document_versions' })
 export class DbDocumentVersion extends BaseEntity {
@@ -27,9 +29,8 @@ export class DbDocumentVersion extends BaseEntity {
   })
   @Column({
     type: 'integer',
-    select: false,
   })
-  public user_id!: number;
+  public user_id: number;
 
   @ApiProperty({
     description: 'Version identifier',
@@ -40,7 +41,7 @@ export class DbDocumentVersion extends BaseEntity {
     nullable: false,
     default: 1,
   })
-  public version_id: number;
+  public version_number: number;
 
   @ApiProperty({
     description: 'Document title',
@@ -72,4 +73,12 @@ export class DbDocumentVersion extends BaseEntity {
     default: () => 'now()',
   })
   public created_at?: Date;
+
+  @ApiHideProperty()
+  @ManyToOne(() => DbDocument, (document) => document.documentVersions)
+  @JoinColumn({
+    name: 'document_id',
+    referencedColumnName: 'document_id',
+  })
+  public document!: DbDocument;
 }
