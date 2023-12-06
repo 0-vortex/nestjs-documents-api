@@ -5,7 +5,7 @@ create table documents
     version_number integer   not null default 1,
     user_id        integer   not null,
     created_at     timestamp not null default current_timestamp,
-    is_deleted     boolean   not null default false,
+    deleted_at     timestamp default null,
 
     constraint documents_pkey primary key (document_id)
 );

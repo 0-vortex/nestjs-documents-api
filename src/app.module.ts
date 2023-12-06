@@ -12,6 +12,10 @@ import { TerminusModule } from '@nestjs/terminus';
 import { HealthModule } from './health/health.module';
 import { HttpModule } from '@nestjs/axios';
 import { HelloModule } from './hello/hello.module';
+import { DbDocument } from './document/entities/document.entity';
+import { DbDocumentVersion } from './document/entities/document_version.entity';
+import { DbDocumentDraft } from './document/entities/document_draft.entity';
+import { DocumentModule } from './document/document.module';
 
 @Module({
   imports: [
@@ -19,6 +23,7 @@ import { HelloModule } from './hello/hello.module';
       load: [ApiConfig, DbConfig],
       isGlobal: true,
     }),
+    DocumentModule,
     HealthModule,
     HelloModule,
     HttpModule,
@@ -46,7 +51,6 @@ import { HelloModule } from './hello/hello.module';
       }),
     }),
     TerminusModule,
-
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       name: 'DbConnection',
@@ -60,7 +64,7 @@ import { HelloModule } from './hello/hello.module';
           password: configService.get('db.password'),
           database: configService.get('db.database'),
           autoLoadEntities: false,
-          entities: [],
+          entities: [DbDocument, DbDocumentDraft, DbDocumentVersion],
           synchronize: false,
           logger: new DatabaseLoggerMiddleware('DB'),
           maxQueryExecutionTime: configService.get('db.maxQueryExecutionTime'),
