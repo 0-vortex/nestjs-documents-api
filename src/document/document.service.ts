@@ -36,4 +36,28 @@ export class DocumentService {
 
     return item;
   }
+
+  async findOneByIdAndVersionId(id: string, versionId: string) {
+    const queryBuilder = this.baseQueryBuilder()
+      .loadRelationCountAndMap('document.versionsCount', 'document.documentVersions')
+      .leftJoinAndMapOne(
+        'document.lastVersion',
+        'document.documentVersions',
+        'document_version',
+        'document_version.document_id = document.document_id',
+      );
+
+    queryBuilder.where('document.document_id = :id and document_version.document_version_id = :versionId', {
+      id,
+      versionId,
+    });
+
+    const item = await queryBuilder.getOne();
+
+    if (!item) {
+      throw new NotFoundException();
+    }
+
+    return item;
+  }
 }
