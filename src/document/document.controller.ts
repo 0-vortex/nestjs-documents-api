@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -18,6 +18,18 @@ import { CreateDocumentDto } from './dtos/create-document.dto';
 @ApiTags('Document service')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
+
+  @Post('/')
+  @ApiOperation({
+    operationId: 'createOne',
+    summary: 'Creates a document',
+  })
+  @ApiOkResponse({ type: DbDocument })
+  @ApiBadRequestResponse({ description: 'Invalid request' })
+  @ApiBody({ type: CreateDocumentDto })
+  async createOne(@Body() createDocumentBody: CreateDocumentDto): Promise<DbDocument> {
+    return this.documentService.createOne(createDocumentBody);
+  }
 
   @Get('/:id')
   @ApiOperation({
@@ -42,16 +54,18 @@ export class DocumentController {
     return this.documentService.deleteOneById(id);
   }
 
-  @Post('/')
+  @Patch('/:id')
   @ApiOperation({
-    operationId: 'createOne',
-    summary: 'Creates a document',
+    operationId: 'updateOneById',
+    summary: 'Updates a document by :id',
   })
-  @ApiOkResponse({ type: DbDocument })
-  @ApiBadRequestResponse({ description: 'Invalid request' })
-  @ApiBody({ type: CreateDocumentDto })
-  async createOne(@Body() createDocumentBody: CreateDocumentDto): Promise<DbDocument> {
-    return this.documentService.createOne(createDocumentBody);
+  @ApiOkResponse({ type: DbDocumentDraft })
+  @ApiNotFoundResponse({ description: 'Document not found' })
+  async updateOneById(
+    @Param('id') id: string,
+    @Body() updateDocumentBody: CreateDocumentDto,
+  ): Promise<DbDocumentDraft> {
+    return this.documentService.updateOneById(id, updateDocumentBody);
   }
 
   @Get('/:id/version/:versionId')

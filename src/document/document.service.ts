@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDocumentDto } from './dtos/create-document.dto';
 import { DbDocumentVersion } from './entities/document_version.entity';
+import { DbDocumentDraft } from './entities/document_draft.entity';
 
 @Injectable()
 export class DocumentService {
@@ -13,6 +14,9 @@ export class DocumentService {
 
     @InjectRepository(DbDocumentVersion, 'DbConnection')
     private documentVersionRepository: Repository<DbDocumentVersion>,
+
+    @InjectRepository(DbDocumentDraft, 'DbConnection')
+    private documentDraftRepository: Repository<DbDocumentDraft>,
   ) {}
 
   baseQueryBuilder() {
@@ -140,5 +144,28 @@ export class DocumentService {
     itemDocument.lastVersion = itemVersion;
 
     return itemDocument;
+  }
+
+  async updateOneById(id: string, updateDocumentBody: CreateDocumentDto) {
+    const itemExists = await this.findOneById(id);
+
+    if (!itemExists) {
+      throw new NotFoundException('Document not found');
+    }
+
+    const itemDraft = await this.documentDraftRepository.save({
+      document_id: itemExists.document_id,
+      document_version_id: itemExists.lastVersion.document_version_id,
+      title: updateDocumentBody.title,
+      content: updateDocumentBody.content,
+      version_number: itemExists.lastVersion.version_number,
+      user_id: updateDocumentBody.user_id,
+    });
+
+    if (!itemDraft) {
+      throw new BadRequestException('Invalid draft request');
+    }
+
+    return itemDraft;
   }
 }
