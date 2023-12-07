@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { DbDocument } from './entities/document.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -89,5 +89,25 @@ export class DocumentService {
     }
 
     return item;
+  }
+
+  async deleteOneById(id: string) {
+    const queryBuilder = this.baseQueryBuilder();
+
+    queryBuilder.withDeleted().addSelect('document.deleted_at').where('document.document_id = :id', { id });
+
+    const itemExists = await queryBuilder.getOne();
+
+    if (!itemExists) {
+      throw new NotFoundException('Document not found');
+    }
+
+    if (itemExists.deleted_at) {
+      throw new ConflictException('Document was already removed');
+    }
+
+    await this.documentRepository.softRemove(itemExists);
+
+    return itemExists;
   }
 }

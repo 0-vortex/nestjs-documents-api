@@ -1,5 +1,5 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Delete, Get, Param } from '@nestjs/common';
+import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DocumentService } from './document.service';
 import { DbDocument } from './entities/document.entity';
 import { DbDocumentVersion } from './entities/document_version.entity';
@@ -19,6 +19,18 @@ export class DocumentController {
   @ApiNotFoundResponse({ description: 'Document not found' })
   async findOneById(@Param('id') id: string): Promise<DbDocument> {
     return this.documentService.findOneById(id);
+  }
+
+  @Delete('/:id')
+  @ApiOperation({
+    operationId: 'deleteOneById',
+    summary: 'Deletes a document by :id',
+  })
+  @ApiOkResponse({ type: DbDocument })
+  @ApiNotFoundResponse({ description: 'Document not found' })
+  @ApiConflictResponse({ description: 'Document was already removed' })
+  async deleteOneById(@Param('id') id: string): Promise<DbDocument> {
+    return this.documentService.deleteOneById(id);
   }
 
   @Get('/:id/version/:versionId')
