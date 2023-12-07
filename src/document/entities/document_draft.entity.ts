@@ -29,7 +29,6 @@ export class DbDocumentDraft extends BaseEntity {
   @Column({
     type: 'uuid',
     nullable: false,
-    select: false,
   })
   public document_version_id!: string;
 
@@ -39,7 +38,6 @@ export class DbDocumentDraft extends BaseEntity {
   })
   @Column({
     type: 'integer',
-    select: false,
   })
   public user_id!: number;
 

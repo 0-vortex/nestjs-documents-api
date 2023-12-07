@@ -71,6 +71,11 @@ export class DbDocument extends BaseEntity {
   public lastVersion: DbDocumentVersion;
 
   @ApiProperty({
+    description: 'Document draft data',
+  })
+  public draft!: DbDocumentDraft;
+
+  @ApiProperty({
     description: 'Number of document versions',
     example: 2,
   })

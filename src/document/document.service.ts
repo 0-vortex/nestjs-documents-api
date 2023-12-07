@@ -168,4 +168,34 @@ export class DocumentService {
 
     return itemDraft;
   }
+
+  async publishOneByIdAndDraftId(id: string, draftId: string) {
+    const itemExists = await this.findOneById(id);
+    const itemDraftsExists = await this.findOneByIdAndDraftId(id, draftId);
+
+    if (!itemExists || !itemDraftsExists) {
+      throw new NotFoundException('Document not found');
+    }
+
+    console.log(itemExists);
+
+    if (itemExists.lastVersion.document_version_id !== itemDraftsExists.draft.document_version_id) {
+      throw new ConflictException('Document draft version mismatch');
+    }
+
+    itemExists.version_number = itemExists.version_number + 1;
+    itemExists.versionsCount = itemExists.versionsCount + 1;
+    const itemVersion = await this.documentVersionRepository.save({
+      document_id: itemExists.document_id,
+      title: itemExists.draft.title,
+      content: itemExists.draft.content,
+      version_number: itemExists.version_number,
+      user_id: itemExists.draft.user_id,
+    });
+    await itemExists.save();
+
+    itemExists.lastVersion = itemVersion;
+
+    return itemExists;
+  }
 }

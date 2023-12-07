@@ -89,4 +89,17 @@ export class DocumentController {
   async findOneByIdAndDraftId(@Param('id') id: string, @Param('draftId') draftId: string): Promise<DbDocument> {
     return this.documentService.findOneByIdAndDraftId(id, draftId);
   }
+
+  @Post('/:id/draft/:draftId/publish')
+  @ApiOperation({
+    operationId: 'publishOneByIdAndDraftId',
+    summary: 'Publishes a document draft by :id and :draftId',
+  })
+  @ApiOkResponse({ type: DbDocument })
+  @ApiNotFoundResponse({ description: 'Document draft not found' })
+  @ApiConflictResponse({ description: 'Document draft version mismatch' })
+  @ApiConflictResponse({ description: 'Document draft was already published' })
+  async publishOneByIdAndDraftId(@Param('id') id: string, @Param('draftId') draftId: string): Promise<DbDocument> {
+    return this.documentService.publishOneByIdAndDraftId(id, draftId);
+  }
 }
