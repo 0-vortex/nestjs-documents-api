@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -101,5 +101,20 @@ export class DocumentController {
   @ApiConflictResponse({ description: 'Document draft was already published' })
   async publishOneByIdAndDraftId(@Param('id') id: string, @Param('draftId') draftId: string): Promise<DbDocument> {
     return this.documentService.publishOneByIdAndDraftId(id, draftId);
+  }
+
+  @Put('/:id/draft/:draftId/publish')
+  @ApiOperation({
+    operationId: 'publishOneByIdAndDraftIdForced',
+    summary: 'Publishes a document draft by :id and :draftId forcefully',
+  })
+  @ApiOkResponse({ type: DbDocument })
+  @ApiNotFoundResponse({ description: 'Document draft not found' })
+  @ApiConflictResponse({ description: 'Document draft was already published' })
+  async publishOneByIdAndDraftIdForced(
+    @Param('id') id: string,
+    @Param('draftId') draftId: string,
+  ): Promise<DbDocument> {
+    return this.documentService.publishOneByIdAndDraftId(id, draftId, true);
   }
 }

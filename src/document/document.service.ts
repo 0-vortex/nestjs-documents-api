@@ -169,7 +169,7 @@ export class DocumentService {
     return itemDraft;
   }
 
-  async publishOneByIdAndDraftId(id: string, draftId: string) {
+  async publishOneByIdAndDraftId(id: string, draftId: string, force = false) {
     const itemExists = await this.findOneById(id);
     const itemDraftsExists = await this.findOneByIdAndDraftId(id, draftId);
 
@@ -177,9 +177,7 @@ export class DocumentService {
       throw new NotFoundException('Document not found');
     }
 
-    console.log(itemExists);
-
-    if (itemExists.lastVersion.document_version_id !== itemDraftsExists.draft.document_version_id) {
+    if (!force && itemExists.lastVersion.document_version_id !== itemDraftsExists.draft.document_version_id) {
       throw new ConflictException('Document draft version mismatch');
     }
 
@@ -187,10 +185,10 @@ export class DocumentService {
     itemExists.versionsCount = itemExists.versionsCount + 1;
     const itemVersion = await this.documentVersionRepository.save({
       document_id: itemExists.document_id,
-      title: itemExists.draft.title,
-      content: itemExists.draft.content,
+      title: itemDraftsExists.draft.title,
+      content: itemDraftsExists.draft.content,
       version_number: itemExists.version_number,
-      user_id: itemExists.draft.user_id,
+      user_id: itemDraftsExists.draft.user_id,
     });
     await itemExists.save();
 
