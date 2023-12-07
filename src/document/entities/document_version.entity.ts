@@ -9,7 +9,7 @@ export class DbDocumentVersion extends BaseEntity {
     description: 'Document version identifier',
     example: '40fd298e-0acb-4ef7-ac2e-d894a0cf74a3',
   })
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   public document_version_id!: string;
 
   @ApiProperty({

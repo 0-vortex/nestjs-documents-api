@@ -8,7 +8,7 @@ export class DbDocumentDraft extends BaseEntity {
     description: 'Document draft identifier',
     example: '40fd298e-0acb-4ef7-ac2e-d894a0cf74a3',
   })
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   public document_draft_id!: string;
 
   @ApiProperty({

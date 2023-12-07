@@ -1,4 +1,12 @@
-import { Entity, Column, BaseEntity, PrimaryColumn, CreateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  BaseEntity,
+  CreateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DbDocumentVersion } from './document_version.entity';
 import { DbDocumentDraft } from './document_draft.entity';
@@ -9,8 +17,8 @@ export class DbDocument extends BaseEntity {
     description: 'Document identifier',
     example: '40fd298e-0acb-4ef7-ac2e-d894a0cf74a3',
   })
-  @PrimaryColumn()
-  public document_id!: string;
+  @PrimaryGeneratedColumn('uuid')
+  public document_id: string;
 
   @ApiProperty({
     description: 'Document version',
@@ -21,7 +29,7 @@ export class DbDocument extends BaseEntity {
     nullable: false,
     default: 1,
   })
-  public version_number: string;
+  public version_number: number;
 
   @ApiProperty({
     description: 'Author identifier',

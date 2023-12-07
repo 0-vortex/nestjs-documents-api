@@ -1,13 +1,18 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { DbDocument } from './entities/document.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateDocumentDto } from './dtos/create-document.dto';
+import { DbDocumentVersion } from './entities/document_version.entity';
 
 @Injectable()
 export class DocumentService {
   constructor(
     @InjectRepository(DbDocument, 'DbConnection')
     private documentRepository: Repository<DbDocument>,
+
+    @InjectRepository(DbDocumentVersion, 'DbConnection')
+    private documentVersionRepository: Repository<DbDocumentVersion>,
   ) {}
 
   baseQueryBuilder() {
@@ -109,5 +114,31 @@ export class DocumentService {
     await this.documentRepository.softRemove(itemExists);
 
     return itemExists;
+  }
+
+  async createOne(createDocumentBody: CreateDocumentDto) {
+    const itemDocument = await this.documentRepository.save({
+      user_id: createDocumentBody.user_id,
+    });
+
+    if (!itemDocument) {
+      throw new BadRequestException('Invalid document request');
+    }
+
+    const itemVersion = await this.documentVersionRepository.save({
+      document_id: itemDocument.document_id,
+      title: createDocumentBody.title,
+      content: createDocumentBody.content,
+      version_number: itemDocument.version_number,
+      user_id: createDocumentBody.user_id,
+    });
+
+    if (!itemVersion) {
+      throw new BadRequestException('Invalid version request');
+    }
+
+    itemDocument.lastVersion = itemVersion;
+
+    return itemDocument;
   }
 }

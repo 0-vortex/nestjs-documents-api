@@ -1,9 +1,18 @@
-import { Controller, Delete, Get, Param } from '@nestjs/common';
-import { ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { DocumentService } from './document.service';
 import { DbDocument } from './entities/document.entity';
 import { DbDocumentVersion } from './entities/document_version.entity';
 import { DbDocumentDraft } from './entities/document_draft.entity';
+import { CreateDocumentDto } from './dtos/create-document.dto';
 
 @Controller('documents')
 @ApiTags('Document service')
@@ -31,6 +40,18 @@ export class DocumentController {
   @ApiConflictResponse({ description: 'Document was already removed' })
   async deleteOneById(@Param('id') id: string): Promise<DbDocument> {
     return this.documentService.deleteOneById(id);
+  }
+
+  @Post('/')
+  @ApiOperation({
+    operationId: 'createOne',
+    summary: 'Creates a document',
+  })
+  @ApiOkResponse({ type: DbDocument })
+  @ApiBadRequestResponse({ description: 'Invalid request' })
+  @ApiBody({ type: CreateDocumentDto })
+  async createOne(@Body() createDocumentBody: CreateDocumentDto): Promise<DbDocument> {
+    return this.documentService.createOne(createDocumentBody);
   }
 
   @Get('/:id/version/:versionId')
