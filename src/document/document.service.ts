@@ -5,6 +5,10 @@ import { Repository } from 'typeorm';
 import { CreateDocumentDto } from './dtos/create-document.dto';
 import { DbDocumentVersion } from './entities/document_version.entity';
 import { DbDocumentDraft } from './entities/document_draft.entity';
+import { OrderDirectionEnum } from '../common/constants/order-direction.constant';
+import { PageOptionsDto } from '../common/dtos/page-options.dto';
+import { PageMetaDto } from '../common/dtos/page-meta.dto';
+import { PageDto } from '../common/dtos/page.dto';
 
 @Injectable()
 export class DocumentService {
@@ -209,5 +213,64 @@ export class DocumentService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async findAll(pageOptionsDto: PageOptionsDto) {
+    const queryBuilder = this.baseQueryBuilder()
+      .loadRelationCountAndMap('document.versionsCount', 'document.documentVersions')
+      .leftJoinAndMapOne(
+        'document.lastVersion',
+        'document.documentVersions',
+        'document_version',
+        'document_version.version_number = document.version_number',
+      );
+
+    queryBuilder
+      .orderBy(`"document"."created_at"`, OrderDirectionEnum.ASC)
+      .offset(pageOptionsDto.skip)
+      .limit(pageOptionsDto.limit);
+
+    const itemCount = await queryBuilder.getCount();
+    const entities = await queryBuilder.getMany();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+
+    return new PageDto(entities, pageMetaDto);
+  }
+
+  async findAllVersions(id: string, pageOptionsDto: PageOptionsDto) {
+    const queryBuilder = this.documentVersionRepository.createQueryBuilder('document_version');
+
+    queryBuilder.where('document_version.document_id = :id', { id });
+
+    queryBuilder
+      .orderBy(`"document_version"."created_at"`, OrderDirectionEnum.ASC)
+      .offset(pageOptionsDto.skip)
+      .limit(pageOptionsDto.limit);
+
+    const itemCount = await queryBuilder.getCount();
+    const entities = await queryBuilder.getMany();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+
+    return new PageDto(entities, pageMetaDto);
+  }
+
+  async findAllDrafts(id: string, pageOptionsDto: PageOptionsDto) {
+    const queryBuilder = this.documentDraftRepository.createQueryBuilder('document_draft');
+
+    queryBuilder.where('document_draft.document_id = :id', { id });
+
+    queryBuilder
+      .orderBy(`"document_draft"."created_at"`, OrderDirectionEnum.ASC)
+      .offset(pageOptionsDto.skip)
+      .limit(pageOptionsDto.limit);
+
+    const itemCount = await queryBuilder.getCount();
+    const entities = await queryBuilder.getMany();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+
+    return new PageDto(entities, pageMetaDto);
   }
 }
