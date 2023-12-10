@@ -170,6 +170,10 @@ export class DocumentService {
   }
 
   async publishOneByIdAndDraftId(id: string, draftId: string, force = false) {
+    const queryRunner = this.documentVersionRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     const itemExists = await this.findOneById(id);
     const itemDraftsExists = await this.findOneByIdAndDraftId(id, draftId);
 
@@ -181,19 +185,29 @@ export class DocumentService {
       throw new ConflictException('Document draft version mismatch');
     }
 
-    itemExists.version_number = itemExists.version_number + 1;
-    itemExists.versionsCount = itemExists.versionsCount + 1;
-    const itemVersion = await this.documentVersionRepository.save({
-      document_id: itemExists.document_id,
-      title: itemDraftsExists.draft.title,
-      content: itemDraftsExists.draft.content,
-      version_number: itemExists.version_number,
-      user_id: itemDraftsExists.draft.user_id,
-    });
-    await itemExists.save();
+    try {
+      itemExists.version_number = itemExists.version_number + 1;
+      itemExists.versionsCount = itemExists.versionsCount + 1;
+      const itemVersion = await queryRunner.manager.getRepository(DbDocumentVersion).save({
+        document_id: itemExists.document_id,
+        title: itemDraftsExists.draft.title,
+        content: itemDraftsExists.draft.content,
+        version_number: itemExists.version_number,
+        user_id: itemDraftsExists.draft.user_id,
+      });
+      await queryRunner.manager.getRepository(DbDocument).save(itemExists);
 
-    itemExists.lastVersion = itemVersion;
+      itemExists.lastVersion = itemVersion;
 
-    return itemExists;
+      await queryRunner.commitTransaction();
+
+      return itemExists;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+
+      throw new BadRequestException('Invalid publish request');
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
