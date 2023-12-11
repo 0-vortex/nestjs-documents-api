@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -13,11 +13,25 @@ import { DbDocument } from './entities/document.entity';
 import { DbDocumentVersion } from './entities/document_version.entity';
 import { DbDocumentDraft } from './entities/document_draft.entity';
 import { CreateDocumentDto } from './dtos/create-document.dto';
+import { ApiPaginatedResponse } from '../common/decorators/api-paginated-response.decorator';
+import { PageOptionsDto } from '../common/dtos/page-options.dto';
+import { PageDto } from '../common/dtos/page.dto';
 
 @Controller('documents')
 @ApiTags('Document service')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
+
+  @Get('/list')
+  @ApiOperation({
+    operationId: 'findAll',
+    summary: 'Finds all documents and paginates them',
+  })
+  @ApiPaginatedResponse(DbDocument)
+  @ApiOkResponse({ type: DbDocument })
+  async findAll(@Query() pageOptionsDto: PageOptionsDto): Promise<PageDto<DbDocument>> {
+    return this.documentService.findAll(pageOptionsDto);
+  }
 
   @Post('/')
   @ApiOperation({
@@ -68,6 +82,20 @@ export class DocumentController {
     return this.documentService.updateOneById(id, updateDocumentBody);
   }
 
+  @Get('/:id/versions/list')
+  @ApiOperation({
+    operationId: 'findAllVersionsById',
+    summary: 'Finds all document versions by :id and paginates them',
+  })
+  @ApiPaginatedResponse(DbDocumentVersion)
+  @ApiOkResponse({ type: DbDocumentVersion })
+  async findAllVersions(
+    @Param('id') id: string,
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<DbDocumentVersion>> {
+    return this.documentService.findAllVersions(id, pageOptionsDto);
+  }
+
   @Get('/:id/version/:versionId')
   @ApiOperation({
     operationId: 'findOneByIdAndVersionId',
@@ -77,6 +105,20 @@ export class DocumentController {
   @ApiNotFoundResponse({ description: 'Document version not found' })
   async findOneByIdAndVersionId(@Param('id') id: string, @Param('versionId') versionId: string): Promise<DbDocument> {
     return this.documentService.findOneByIdAndVersionId(id, versionId);
+  }
+
+  @Get('/:id/drafts/list')
+  @ApiOperation({
+    operationId: 'findAllDraftsById',
+    summary: 'Finds all document drafts by :id and paginates them',
+  })
+  @ApiPaginatedResponse(DbDocumentDraft)
+  @ApiOkResponse({ type: DbDocumentDraft })
+  async findAllDrafts(
+    @Param('id') id: string,
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<DbDocumentDraft>> {
+    return this.documentService.findAllDrafts(id, pageOptionsDto);
   }
 
   @Get('/:id/draft/:draftId')
